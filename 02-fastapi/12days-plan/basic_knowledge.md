@@ -1,7 +1,7 @@
 ## 一、FastAPI框架简介
 FastAPI是一个基于 Python 的高性能 Web 框架，专门用于快速构建 API 接口服务
 
-### 1.PythonWeb对比图
+- PythonWeb对比图
 
 | 对比维度 |       FastAPI        |     Flask     |    Django    |
 | :------: | :------------------: | :-----------: | :----------: |
@@ -10,8 +10,9 @@ FastAPI是一个基于 Python 的高性能 Web 框架，专门用于快速构建
 | 数据验证 | ✔ Pydantic 自动校验  |  ❌ 手动处理   | ✔ ORM 级验证 |
 | 自动文档 |      ✔ 自动生成      |   ❌ 需插件    |   ❌ 需扩展   |
 | 适用场景 | API、微服务、AI 推理 | 小型 web 项目 |   大型网站   |
-### 2.同步与异步
-[点击这里查看 FastAPI 示例代码](https://github.com/whchim/ai-learning/blob/main/02-fastapi/FastApi_code/main1.py)
+- 同步与异步
+
+[点击这里查看 FastAPI 示例代码](https://github.com/whchim/ai-learning/blob/main/02-fastapi/FastApi_code/case1.py)
 
 ## 二、第一个Fast小程序
 
@@ -39,3 +40,140 @@ FastAPI的路由定义基于 Python 的装饰器模式
 
 ![image_01](D:\ai-learning\02-fastapi\.img\image_01.png)
 
+## 四、参数简介
+
+同一段接口逻辑，根据参数不同返回不同的数据
+
+![image_02](D:\ai-learning\02-fastapi\.img\image_02.png)
+
+参数就是客户端发送请求时附带的额外信息和指令
+
+参数的作用是让同一个接口能根据不同的输入，返回不同的输出，实现动态交互
+
+- **参数分类**
+
+  - 路径参数：
+
+    位置：URL 路径的一部分 /look/{id}
+
+    作用：指向唯一的，特定的资源
+
+    方法：GET
+
+  - 查询参数：
+
+    位置：URL？ 之后 k1=v1&k2=v2
+
+    作用：对资源集合进行过滤、排序、分页等操作
+
+    方法：GET
+
+  - 请求体：
+
+    位置：HTTP 请求的消息体（body）中
+
+    作用：创建、更新资源 携带大量数据，如：JSON
+
+    方法：POST、PUT 等
+
+## 五、路径参数_Path类型注解
+
+FastAPI 允许为参数声明额外的信息和校验
+
+| Path 参数             | 说明                        |
+| --------------------- | --------------------------- |
+| ...                   | 必填                        |
+| gt/ge lt/le           | 大于/大于等于 小于/小于等于 |
+| description           | 描述                        |
+| min_length max_length | 长度限制                    |
+
+## 六、查询参数_Query类型注解
+
+声明的参数不是路径参数时，路径操作函数会把该参数自动解释为查询参数
+
+参数形式与Path相同
+
+| Query 参数            | 说明                        |
+| --------------------- | --------------------------- |
+| ...                   | 必填                        |
+| gt/ge lt/le           | 大于/大于等于 小于/小于等于 |
+| description           | 描述                        |
+| min_length max_length | 长度限制                    |
+
+## 七、请求体参数_Field类型注解
+
+在HTTP协议中，一个完整的请求由三部分组成：
+
+① 请求行：包含方法、URL、协议版本
+② 请求头：元数据信息（Content-Type、Authorization等）
+③ 请求体：实际要发送的数据内容
+
+请求体参数的作用：创造、更新资源
+
+| Field 参数  | 说明          |
+| ----------- | ------------- |
+| ...         | 必填          |
+| gt/ge       | 大于/大于等于 |
+| lt/le       | 小于/小于等于 |
+| default     | 默认值        |
+| description | 描述          |
+| min_length  | 最小长度限制  |
+| max_length  | 最大长度限    |
+
+##  八、响应类型      
+
+- 请求响应
+
+  ![image_03](D:\ai-learning\02-fastapi\.img\image_03.png)
+
+- 响应类型
+
+  默认情况下，FastAPI 会**自动**将路径操作函数返回的 **Python 对象**（字典、列表、Pydantic 模型等），经由 `jsonable_encoder` 转换为 **JSON** 兼容格式，并包装为 `JSONResponse` 返回。这省去了手动序列化的步骤，让开发者能更专注于业务逻辑。
+
+  如果需要返回非 JSON 数据（如 HTML、文件流），FastAPI 提供了丰富的响应类型来返回不同数据。
+
+  | 响应类型          | 用途                   | 示例                                |
+  | ----------------- | ---------------------- | ----------------------------------- |
+  | **JSONResponse**  | 默认响应，返回JSON数据 | `return {"key": "value"}`           |
+  | **HTMLResponse**  | 返回HTML内容           | `return HTMLResponse(html_content)` |
+  | PlainTextResponse | 返回纯文本             | `return PlainTextResponse("text")`  |
+  | **FileResponse**  | 返回文件下载           | `return FileResponse(path)`         |
+  | StreamingResponse | 流式响应               | 生成器函数返回数据                  |
+  | RedirectResponse  | 重定向                 | `return RedirectResponse(url)`      |
+
+- 响应类型设置方式
+
+  - 装饰器中指定响应类
+
+    场景：固定返回类型（HTML、纯文本等）
+
+    ```python
+    @app.get("/html", response_class=HTMLResponse)
+    async def get_html():
+        return "<h1>这是标题</h1>"
+    ```
+
+  - 返回响应对象
+
+    场景：文件、图片、流式响应
+
+    ```python
+    @app.get("/file")
+    async def get_file():
+        file_path = "./files/1.jpeg"
+        return FileResponse(file_path)
+    ```
+
+- 响应 HTML 格式
+
+  设置响应类为 HTMLResponse，当前接口即可返回 HTML 内容
+
+  ```python
+  from fastapi.responses import HTMLResponse
+  
+  @app.get("/html", response_class=HTMLResponse)
+  async def get_html():
+      return "<h1>Hello World</h1>"
+  ```
+
+  

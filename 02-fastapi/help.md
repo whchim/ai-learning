@@ -1,6 +1,6 @@
 使用 uvicorn 启动服务
 
-uvicorn main:app --reload # --reload:更改代码后自动重启服务器
+uvicorn main:app --reload # --reload:更改代码后自动重启服务器 注意：main是你的文件名
 
 切换到可交互式界面
 
